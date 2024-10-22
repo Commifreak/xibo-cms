@@ -230,7 +230,7 @@ class WidgetDataProviderCache
         $cached = $this->cache->set($object);
 
         if (!$cached) {
-            throw new GeneralException('Cache failure');
+            throw new GeneralException('Cache failure (set object)');
         }
 
         // Keep the cache 50% longer than necessary
@@ -238,7 +238,9 @@ class WidgetDataProviderCache
         $this->cache->expiresAfter(ceil(max($dataProvider->getCacheTtl() * 1.5, 900)));
 
         // Save to the pool
-        $this->pool->save($this->cache);
+        if(!$this->pool->save($this->cache)) {
+            throw new GeneralException('Cache failure (pool save)');
+        }
 
         $this->getLog()->debug('saveToCache: cached ' . $this->key
             . ' for ' . $dataProvider->getCacheTtl() . ' seconds');
